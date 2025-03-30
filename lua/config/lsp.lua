@@ -1,18 +1,18 @@
 require("mason").setup()
 require("mason-lspconfig").setup()
 
-local servers = { 'tailwindcss', 'ts_ls', 'jsonls', 'eslint', 'lua_ls'}
+local servers = { 'tailwindcss', 'ts_ls', 'jsonls', 'eslint', 'lua_ls', 'pyright', 'ruff' }
 
 
 -- After setting up mason-lspconfig you may set up servers via lspconfig
 require("mason-lspconfig").setup {
-    ensure_installed = servers,
+  ensure_installed = servers,
 }
 
 
 -- LSP Mappings + Settings -----------------------------------------------------
 -- modified from: https://github.com/neovim/nvim-lspconfig#suggested-configuration
-local opts = { noremap=true, silent=true }
+local opts = { noremap = true, silent = true }
 -- Basic diagnostic mappings, these will navigate to or display diagnostics
 vim.keymap.set('n', '<space>d', vim.diagnostic.open_float, opts)
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
@@ -25,18 +25,29 @@ local on_attach = function(client, bufnr)
   -- Enable completion triggered by <c-x><c-o>
   vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
 
-  -- Mappings to magical LSP functions!
-  local bufopts = { noremap=true, silent=true, buffer=bufnr }
-  vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
-  vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
-  vim.keymap.set('n', 'gk', vim.lsp.buf.hover, bufopts)
-  vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, bufopts)
-  vim.keymap.set('n', 'gK', vim.lsp.buf.signature_help, bufopts)
-  vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, bufopts)
-  vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, bufopts)
-  vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts)
-  vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
-  vim.keymap.set('n', '<space>f', function() vim.lsp.buf.format { async = true } end, bufopts)
+  -- -- Mappings to magical LSP functions!
+  local bufopts = { noremap = true, silent = true, buffer = bufnr }
+
+  vim.keymap.set({ 'n', 'v' }, '<leader>r', vim.lsp.buf.rename, bufopts)
+  vim.keymap.set({ 'n', 'v' }, '<leader>a', vim.lsp.buf.code_action, bufopts)
+  vim.keymap.set('n', '<leader>jr', vim.lsp.buf.references, bufopts)
+
+  vim.keymap.set('n', '<leader>jD', vim.lsp.buf.declaration, bufopts)
+  vim.keymap.set('n', '<leader>jd', vim.lsp.buf.definition, bufopts)
+  if client.server_capabilities.hoverProvider then
+    vim.keymap.set('n', '<leader>h', vim.lsp.buf.hover, bufopts)
+  end
+  vim.keymap.set('n', '<leader>ji', vim.lsp.buf.implementation, bufopts)
+  vim.keymap.set('n', '<C-i>', vim.lsp.buf.signature_help, bufopts)
+  vim.keymap.set('n', '<leader>wa', vim.lsp.buf.add_workspace_folder, bufopts)
+  vim.keymap.set('n', '<leader>wr', vim.lsp.buf.remove_workspace_folder, bufopts)
+  vim.keymap.set('n', '<leader>wl', function()
+    print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+  end, bufopts)
+  vim.keymap.set('n', '<leader>D', vim.lsp.buf.type_definition, bufopts)
+  vim.keymap.set('n', '<leader>l', function()
+    vim.lsp.buf.format { async = true }
+  end, bufopts)
 end
 
 -- The nvim-cmp almost supports LSP's capabilities so You should advertise it to LSP servers..
@@ -49,8 +60,18 @@ capabilities.textDocument.completion.completionItem.snippetSupport = true
 -- All LSPs in this list need to be manually installed via NPM/PNPM/whatevs
 local lspconfig = require('lspconfig')
 for _, lsp in pairs(servers) do
-  lspconfig[lsp].setup {
+  local config = {
     on_attach = on_attach,
-    capabilites = capabilities,
+    capabilities = capabilities,
   }
+
+  -- Настройка maxServerMemory для TypeScript (tsserver)
+  if lsp == "ts_ls" then
+    config.init_options = {
+      maxTsServerMemory = 4096   -- Устанавливаем 4GB памяти для TSServer
+    }
+  end
+
+  lspconfig[lsp].setup(config)
 end
+
