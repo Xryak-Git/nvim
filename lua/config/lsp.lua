@@ -1,7 +1,7 @@
 require("mason").setup()
 require("mason-lspconfig").setup()
 
-local servers = { 'tailwindcss', 'ts_ls', 'jsonls', 'eslint', 'lua_ls', 'pyright', 'ruff' }
+local servers = { 'gopls', 'tailwindcss', 'ts_ls', 'jsonls', 'eslint', 'lua_ls', 'pyright', 'ruff' }
 
 
 -- After setting up mason-lspconfig you may set up servers via lspconfig
@@ -50,7 +50,7 @@ local on_attach = function(client, bufnr)
   end, bufopts)
 end
 
--- The nvim-cmp almost supports LSP's capabilities so You should advertise it to LSP servers..
+-- The nvim-cmp almost supports LSP's capabilitu:es so You should advertise it to LSP servers..
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
 -- Capabilities required for the visualstudio lsps (css, html, etc)
@@ -58,6 +58,8 @@ capabilities.textDocument.completion.completionItem.snippetSupport = true
 
 -- Activate LSPs
 -- All LSPs in this list need to be manually installed via NPM/PNPM/whatevs
+local util = require('lspconfig/util')
+
 local lspconfig = require('lspconfig')
 for _, lsp in pairs(servers) do
   local config = {
@@ -66,12 +68,20 @@ for _, lsp in pairs(servers) do
   }
 
   -- Настройка maxServerMemory для TypeScript (tsserver)
-  if lsp == "ts_ls" then
-    config.init_options = {
-      maxTsServerMemory = 4096   -- Устанавливаем 4GB памяти для TSServer
+  if lsp == "gopls" then
+    config.cmd = { 'gopls', 'serve' }
+    config.filetypes = { 'go', 'go.mod' }
+    config.root_dir = util.root_pattern('go.work', 'go.mod', '.git')
+    config.settings = {
+      gopls = {
+        analyses = {
+          unusedparams = true,
+          shadow = true,
+        },
+        staticcheck = true,
+      }
     }
   end
 
   lspconfig[lsp].setup(config)
 end
-

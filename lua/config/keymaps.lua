@@ -5,11 +5,13 @@ map('n', '<esc>', ':nohlsearch<CR>', { noremap = true, silent = true })
 
 
 -- Explorer
-map('n', '<leader>e', vim.cmd.Ex, { desc = 'Explorer' })
+-- map('n', '<leader>E', vim.cmd.Ex, { desc = 'Explorer' })
 -- NeoTree
-vim.keymap.set('n', '<leader>E', ':Neotree float reveal<CR>')
-vim.keymap.set('n', '<leader>e', ':Neotree left reveal<CR>')
-vim.keymap.set('n', '<leader>o', ':Neotree float git_status<CR>')
+map('n', '<leader>E:', ':Neotree float reveal<CR>')
+map('n', '<leader>e', ':Neotree left reveal<CR>')
+map('n', '<leader>o', ':Neotree float git_status<CR>')
+          -- Выйти из Neo-tree по <Esc>
+map("n", "<s-Esc>", ":Neotree close<CR>")
 
 
 -- Move highlighted blocks with J and K
@@ -23,16 +25,22 @@ map('n', '<leader>fb', builtin.buffers, { desc = 'Telescope buffers' })
 map('n', '<leader>fh', builtin.help_tags, { desc = 'Telescope help tags' })
 
 -- Tabs
-vim.keymap.set('n', '<Tab>', ':BufferLineCycleNext<CR>')
-vim.keymap.set('n', '<s-Tab>', ':BufferLineCyclePrev<CR>')
+map('n', '<Tab>', ':BufferLineCycleNext<CR>')
+map('n', '<s-Tab>', ':BufferLineCyclePrev<CR>')
 
 -- Windows
-vim.keymap.set('n', '<leader>J', ':split<CR>')
-vim.keymap.set('n', '<leader>L', ':vsplit<CR>')
+map('n', '<leader>J', ':split<CR>')
+map('n', '<leader>L', ':vsplit<CR>')
 
-vim.keymap.set('n', '<c-h>', ':split<CR>')
+map('n', '<c-h>', ':split<CR>') 
 
-vim.keymap.set('n', '<c-Q>', ':qa!<CR>')
+map('n', '<c-Q>', ':qa!<CR>')
+
+-- Перемещение между окнами
+map('n', '<C-h>', '<C-w>h', { desc = 'Move to left window' })
+map('n', '<C-j>', '<C-w>j', { desc = 'Move to bottom window' })
+map('n', '<C-k>', '<C-w>k', { desc = 'Move to top window' })
+map('n', '<C-l>', '<C-w>l', { desc = 'Move to right window' })
 
     --   { "<c-h>",  "<cmd><C-U>TmuxNavigateLeft<cr>" },
     --   { "<c-j>",  "<cmd><C-U>TmuxNavigateDown<cr>" },
